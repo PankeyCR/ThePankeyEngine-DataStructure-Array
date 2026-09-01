@@ -567,18 +567,19 @@ namespace pankey{
 						return remove(a_index);
 					}
 
-					void operator=(const ArrayPointer<Policy>& a_values){
+					ArrayPointer<Policy>& operator=(const ArrayPointer<Policy>& a_values){
 						ArrayPointerLog(pankey_Log_StartMethod, "operator=", "");
 						ArrayPointerLog(pankey_Log_Statement, "operator=", "const ArrayPointer&");
 						this->m_allocator = setMemoryAllocator(this->m_allocator, a_values.m_allocator);
 						this->clear();
 						if(a_values.isEmpty()){
 							ArrayPointerLog(pankey_Log_EndMethod, "operator=", "a_values.isEmpty()");
-							return;
+							return *this;
 						}
 						this->createArray(a_values.m_last_index);
 						this->copy(a_values.m_t_value, a_values.m_last_index);
 						ArrayPointerLog(pankey_Log_EndMethod, "operator=", "");
+						return *this;
 					}
 
 					bool operator==(const ArrayPointer<Policy>& a_values)const{
@@ -662,6 +663,29 @@ namespace pankey{
 						}
 						ArrayPointerLog(pankey_Log_EndMethod, "operator!=", "");
 						return i_sum;
+					}
+
+					ArrayPointer<Policy> operator+=(const ArrayPointer<Policy>& a_values){
+						ArrayPointerLog(pankey_Log_StartMethod, "operator+=", "");
+						if(this->isEmpty() && a_values.isEmpty()){
+							ArrayPointerLog(pankey_Log_Statement, "operator+=", "this->isEmpty() == a_values.isEmpty()");
+							ArrayPointerLog(pankey_Log_EndMethod, "operator+=", "");
+							return ArrayPointer<Policy>();
+						}
+						if(this->isEmpty()){
+							ArrayPointerLog(pankey_Log_Statement, "operator+=", "this->isEmpty() == a_values.isEmpty()");
+							ArrayPointerLog(pankey_Log_EndMethod, "operator+=", "");
+							return *this;
+						}
+						if(a_values.isEmpty()){
+							ArrayPointerLog(pankey_Log_Statement, "operator+=", "this->isEmpty() == a_values.isEmpty()");
+							ArrayPointerLog(pankey_Log_EndMethod, "operator+=", "");
+							return ArrayPointer<Policy>(a_values);
+						}
+						ArrayPointer<Policy> i_array = *this;
+						this->operator=(i_array + a_values);
+						ArrayPointerLog(pankey_Log_EndMethod, "operator+=", "");
+						return *this;
 					}
 
 					VALUE_TYPE operator[](SIZE_TYPE a_index)const{
