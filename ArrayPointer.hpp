@@ -290,10 +290,11 @@ namespace pankey{
 					}
 
 					bool add(const ArrayPointer<Policy>& a_array){
-						ArrayPointerLog(pankey_Log_StartMethod, "add", "const VALUE_TYPE&");
+						ArrayPointerLog(pankey_Log_StartMethod, "add", "const ArrayPointer&");
+						// Appending nothing succeeds; there is nothing to fail at.
 						if(a_array.isEmpty()){
 							ArrayPointerLog(pankey_Log_EndMethod, "add", "a_array.isEmpty()");
-							return false;
+							return true;
 						}
 						if(this->getAvailableSpace() < a_array.length() || this->m_t_value == nullptr){
 							ArrayPointerLog(pankey_Log_Statement, "add", "expanding");
@@ -570,6 +571,11 @@ namespace pankey{
 					ArrayPointer<Policy>& operator=(const ArrayPointer<Policy>& a_values){
 						ArrayPointerLog(pankey_Log_StartMethod, "operator=", "");
 						ArrayPointerLog(pankey_Log_Statement, "operator=", "const ArrayPointer&");
+						// Without this, clear() would destroy the source as well.
+						if(this == &a_values){
+							ArrayPointerLog(pankey_Log_EndMethod, "operator=", "self assignment");
+							return *this;
+						}
 						this->m_allocator = setMemoryAllocator(this->m_allocator, a_values.m_allocator);
 						this->clear();
 						if(a_values.isEmpty()){
@@ -637,21 +643,21 @@ namespace pankey{
 					}
 
 					ArrayPointer<Policy> operator+(const ArrayPointer<Policy>& a_values)const{
-						ArrayPointerLog(pankey_Log_StartMethod, "operator!=", "");
+						ArrayPointerLog(pankey_Log_StartMethod, "operator+", "");
 						if(this->isEmpty() && a_values.isEmpty()){
-							ArrayPointerLog(pankey_Log_Statement, "operator!=", "this->isEmpty() == a_values.isEmpty()");
-							ArrayPointerLog(pankey_Log_EndMethod, "operator!=", "");
+							ArrayPointerLog(pankey_Log_Statement, "operator+", "both empty");
+							ArrayPointerLog(pankey_Log_EndMethod, "operator+", "");
 							return ArrayPointer<Policy>();
 						}
 						if(this->isEmpty()){
-							ArrayPointerLog(pankey_Log_Statement, "operator!=", "this->isEmpty() == a_values.isEmpty()");
-							ArrayPointerLog(pankey_Log_EndMethod, "operator!=", "");
-							return *this;
+							ArrayPointerLog(pankey_Log_Statement, "operator+", "this->isEmpty()");
+							ArrayPointerLog(pankey_Log_EndMethod, "operator+", "");
+							return ArrayPointer<Policy>(a_values);
 						}
 						if(a_values.isEmpty()){
-							ArrayPointerLog(pankey_Log_Statement, "operator!=", "this->isEmpty() == a_values.isEmpty()");
-							ArrayPointerLog(pankey_Log_EndMethod, "operator!=", "");
-							return ArrayPointer<Policy>(a_values);
+							ArrayPointerLog(pankey_Log_Statement, "operator+", "a_values.isEmpty()");
+							ArrayPointerLog(pankey_Log_EndMethod, "operator+", "");
+							return ArrayPointer<Policy>(*this);
 						}
 						ArrayPointer<Policy> i_sum;
 						i_sum.createArrayFast(this->length() + a_values.length());
@@ -665,23 +671,19 @@ namespace pankey{
 						return i_sum;
 					}
 
-					ArrayPointer<Policy> operator+=(const ArrayPointer<Policy>& a_values){
+					ArrayPointer<Policy>& operator+=(const ArrayPointer<Policy>& a_values){
 						ArrayPointerLog(pankey_Log_StartMethod, "operator+=", "");
-						if(this->isEmpty() && a_values.isEmpty()){
-							ArrayPointerLog(pankey_Log_Statement, "operator+=", "this->isEmpty() == a_values.isEmpty()");
-							ArrayPointerLog(pankey_Log_EndMethod, "operator+=", "");
-							return ArrayPointer<Policy>();
+						if(a_values.isEmpty()){
+							ArrayPointerLog(pankey_Log_EndMethod, "operator+=", "a_values.isEmpty()");
+							return *this;
 						}
 						if(this->isEmpty()){
-							ArrayPointerLog(pankey_Log_Statement, "operator+=", "this->isEmpty() == a_values.isEmpty()");
+							ArrayPointerLog(pankey_Log_Statement, "operator+=", "this->isEmpty()");
+							this->operator=(a_values);
 							ArrayPointerLog(pankey_Log_EndMethod, "operator+=", "");
 							return *this;
 						}
-						if(a_values.isEmpty()){
-							ArrayPointerLog(pankey_Log_Statement, "operator+=", "this->isEmpty() == a_values.isEmpty()");
-							ArrayPointerLog(pankey_Log_EndMethod, "operator+=", "");
-							return ArrayPointer<Policy>(a_values);
-						}
+						// Copied first so appending an array to itself stays valid.
 						ArrayPointer<Policy> i_array = *this;
 						this->operator=(i_array + a_values);
 						ArrayPointerLog(pankey_Log_EndMethod, "operator+=", "");
@@ -690,8 +692,8 @@ namespace pankey{
 
 					VALUE_TYPE operator[](SIZE_TYPE a_index)const{
 						ArrayPointerLog(pankey_Log_StartMethod, "operator[]", "VALUE_TYPE");
-						if(this->m_t_value == nullptr || a_index < 0 || a_index >= this->m_size){
-							ArrayPointerLog(pankey_Log_EndMethod, "operator[]", "this->m_t_value == nullptr || a_index < 0 || a_index >= this->m_size");
+						if(this->m_t_value == nullptr || a_index < 0 || a_index >= this->m_last_index){
+							ArrayPointerLog(pankey_Log_EndMethod, "operator[]", "this->m_t_value == nullptr || a_index < 0 || a_index >= this->m_last_index");
 							return VALUE_TYPE();
 						}
 						ArrayPointerLog(pankey_Log_EndMethod, "operator[]", "");
