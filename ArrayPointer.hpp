@@ -64,7 +64,7 @@ namespace pankey{
 						ArrayPointerLog(pankey_Log_EndMethod, "Constructor", "");
 					}
 
-					~ArrayPointer(){
+					virtual ~ArrayPointer(){
 						ArrayPointerLog(pankey_Log_StartMethod, "Destructor", "");
 						ArrayPointerLog(pankey_Log_Statement, "Destructor", "~ArrayPointer");
 						pankey::Memory::Allocator::deallocateArray<VALUE_TYPE>(this->m_allocator, this->m_size, this->m_t_value);
