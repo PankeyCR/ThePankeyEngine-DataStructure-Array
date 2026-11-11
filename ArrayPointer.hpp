@@ -205,7 +205,7 @@ namespace pankey{
 						ArrayPointerLog(pankey_Log_EndMethod, "clear", "");
 					}
 
-					void reseVALUE_TYPE(){
+					void reset(){
 						ArrayPointerLog(pankey_Log_StartMethod, "reset", "");
 						this->m_last_index = 0;
 						ArrayPointerLog(pankey_Log_EndMethod, "reset", "");
